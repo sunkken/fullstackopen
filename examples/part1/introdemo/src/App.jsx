@@ -1,3 +1,12 @@
+const Footer = () => {
+  return (
+    <div>
+      <p>greeting app created by <a href='https://github.com/mluukkai'>mluukkai</a>
+</p>
+    </div>
+  )
+}
+
 const Hello = (props) => {
   console.log(props)
   return (
@@ -8,14 +17,11 @@ const Hello = (props) => {
 }
 
 const App = () => {
-  const name = 'Peter'
-  const age = 28
+  const friends = [ 'Peter', 'Maya']
 
   return (
     <div>
-      <h1>Greetings</h1>
-      <Hello name="George" age={26+10} />
-      <Hello name={name} age={age} />
+      <p>{friends}</p>
     </div>
   )
 }
