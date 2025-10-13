@@ -1,7 +1,7 @@
 const Header = ({course_name}) => {
   //console.log(course_name)
   return (
-  <h1>{course_name}</h1>
+  <h2>{course_name}</h2>
   )
 }
 
