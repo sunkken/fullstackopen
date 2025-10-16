@@ -2,37 +2,41 @@ import { useState } from 'react'
 import Person from './components/Person'
 
 const App = () => {
+
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas' }
+    {name: 'Arto Hellas', number: '040-1234567'}
   ]) 
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
 
-  const addName = (event) => {
+  const handleNameChange = (event) => {setNewName(event.target.value)}
+  const handleNumberChange = (event) => {setNewNumber(event.target.value)}
+
+  const addPerson = (event) => {
     event.preventDefault()
-      const nameExists = persons.some(person => Object.is(person.name, newName))
-    
+    //console.log(persons)
+    //console.log(newName)
+    //Currently trying to hinder all name conflicts.
+      const nameExists = persons.some(person =>
+        person.name.toLowerCase().trim() === newName.toLowerCase().trim())
     if (nameExists) {
       alert(`${newName} is already added to phonebook`)
     } else {
-    const nameObject = {name: newName}
-    setPersons(persons.concat(nameObject))
-    setNewName('')
+      const personObject = {name: newName, number: newNumber}
+      setPersons(persons.concat(personObject))
+      setNewName('')
+      setNewNumber('')
     }
-  }
-
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={addName}>
+      <form onSubmit={addPerson}>
         <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
+          <li>name: <input value={newName} onChange={handleNameChange} /></li>
+          <li>number: <input value={newNumber} onChange={handleNumberChange} /></li>
+          <li><button type="submit">add</button></li>
         </div>
       </form>
       <h2>Numbers</h2>
