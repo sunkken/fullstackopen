@@ -25,9 +25,9 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    //Currently hindering all name conflicts.
-      const nameExists = persons.some(person =>
-        person.name.toLowerCase().trim() === newName.toLowerCase().trim())
+
+    const nameExists = persons.some(person =>
+      person.name.toLowerCase().trim() === newName.toLowerCase().trim())
 
     if (nameExists) {
       alert(`${newName} is already added to phonebook`)
@@ -38,9 +38,13 @@ const App = () => {
         id: persons.length + 1
       }
 
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      axios
+        .post('http://localhost:3001/persons', personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber('')
+        })
     }
   }
 
