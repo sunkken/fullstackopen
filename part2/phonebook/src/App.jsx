@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import personService from './services/persons'
+import Notification from './components/Notification'
 import Person from './components/Person'
 import PersonForm from './components/PersonForm'
 import PersonFilter from './components/PersonFilter'
+import './index.css'
 
 const App = () => {
 
@@ -10,6 +12,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilterName] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     personService
@@ -28,7 +31,6 @@ const App = () => {
 
     if (existingPerson) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        console.log('Updating', newName)
         const changedPerson = { ...existingPerson, number: newNumber }
 
         personService
@@ -37,11 +39,11 @@ const App = () => {
             setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person))
             setNewName('')
             setNewNumber('')
+            setNotification(`Updated ${newName}'s number`)
           })
       }
     } else {
       const personObject = {name: newName, number: newNumber}
-      console.log('Adding', newName)
 
       personService
         .create(personObject)
@@ -49,8 +51,12 @@ const App = () => {
           setPersons(persons.concat(addedPerson))
           setNewName('')
           setNewNumber('')
+          setNotification(`Added ${newName}`)
         })
     }
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
   }
 
   const handleRemovePerson = (id) => {
@@ -72,6 +78,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+        <Notification message={notification} />
         <PersonFilter
           filterName={filterName}
           handleFilterChange={handleFilterChange}
