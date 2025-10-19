@@ -23,21 +23,30 @@ const App = () => {
 
   const handleAddPerson = (event) => {
     event.preventDefault()
-    const nameExists = persons.some(person =>
+    const existingPerson = persons.find(person =>
       person.name.toLowerCase().trim() === newName.toLowerCase().trim())
 
-    if (nameExists) {
-      alert(`${newName} is already added to phonebook`)
-    } else {
-      const personObject = {
-        name: newName,
-        number: newNumber
+    if (existingPerson) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        console.log('Updating', newName)
+        const changedPerson = { ...existingPerson, number: newNumber }
+
+        personService
+          .update(existingPerson.id, changedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person))
+            setNewName('')
+            setNewNumber('')
+          })
       }
+    } else {
+      const personObject = {name: newName, number: newNumber}
+      console.log('Adding', newName)
 
       personService
         .create(personObject)
-        .then(returnedPerson => {
-          setPersons(persons.concat(returnedPerson))
+        .then(addedPerson => {
+          setPersons(persons.concat(addedPerson))
           setNewName('')
           setNewNumber('')
         })
@@ -47,8 +56,8 @@ const App = () => {
   const handleRemovePerson = (id) => {
     const person = persons.find(p => p.id === id)
     if (window.confirm(`Delete ${person.name}?`)) {
-      console.log('Deleting', id)
-      
+      console.log('Removing', person.name)
+
       personService
         .remove(id)
         .then(setPersons(persons.filter(p => p.id !== id)))
