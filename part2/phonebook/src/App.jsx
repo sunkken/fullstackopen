@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import personService from './services/persons'
-import Persons from './components/Persons'
+import Person from './components/Person'
 import PersonForm from './components/PersonForm'
 import PersonFilter from './components/PersonFilter'
 
@@ -21,7 +21,7 @@ const App = () => {
   const handleNumberChange = (event) => {setNewNumber(event.target.value)}
   const handleFilterChange = (event) => {setFilterName(event.target.value)}
 
-  const addPerson = (event) => {
+  const handleAddPerson = (event) => {
     event.preventDefault()
     const nameExists = persons.some(person =>
       person.name.toLowerCase().trim() === newName.toLowerCase().trim())
@@ -44,6 +44,17 @@ const App = () => {
     }
   }
 
+  const handleRemovePerson = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (window.confirm(`Delete ${person.name}?`)) {
+      console.log('Deleting', id)
+      
+      personService
+        .remove(id)
+        .then(setPersons(persons.filter(p => p.id !== id)))
+    }
+  }
+
   const filteredPersons = persons.filter(
     person => person.name.toLowerCase()
       .includes(filterName.toLowerCase())
@@ -59,7 +70,7 @@ const App = () => {
       
       <h3>Add new entry</h3>
         <PersonForm
-          addPerson={addPerson}
+          addPerson={handleAddPerson}
           newName={newName}
           handleNameChange={handleNameChange}
           newNumber={newNumber}
@@ -67,7 +78,16 @@ const App = () => {
         />
 
       <h3>Numbers</h3>
-        <Persons filteredPersons={filteredPersons} />
+      <table>
+        <tbody>
+          {filteredPersons.map(person =>
+            <Person
+              key={person.id}
+              person={person}
+              removePerson={() => handleRemovePerson(person.id)} />
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }
