@@ -12,7 +12,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilterName] = useState('')
-  const [notification, setNotification] = useState(null)
+  const [notification, setNotification] = useState({message: null, isError: false})
 
   useEffect(() => {
     personService
@@ -39,7 +39,11 @@ const App = () => {
             setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person))
             setNewName('')
             setNewNumber('')
-            setNotification(`Updated ${newName}'s number`)
+            setNotification({message: `Updated ${newName}'s number`, isError: false})
+          })
+          .catch(error => {
+            setNotification({message: `Information of '${newName}' has already been removed from server`, isError: true})  
+            setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
       }
     } else {
@@ -51,11 +55,11 @@ const App = () => {
           setPersons(persons.concat(addedPerson))
           setNewName('')
           setNewNumber('')
-          setNotification(`Added ${newName}`)
+          setNotification({message: `Added ${newName}`, isError: false})
         })
     }
     setTimeout(() => {
-      setNotification(null)
+      setNotification({message: null, isError: false})
     }, 5000)
   }
 
@@ -67,7 +71,12 @@ const App = () => {
       personService
         .remove(id)
         .then(setPersons(persons.filter(p => p.id !== id)))
+        setNotification({message: `Removed ${person.name}`, isError: false
+        })
     }
+    setTimeout(() => {
+      setNotification({message: null, isError: false})
+    }, 5000)
   }
 
   const filteredPersons = persons.filter(
@@ -78,7 +87,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-        <Notification message={notification} />
+        <Notification content={notification} />
         <PersonFilter
           filterName={filterName}
           handleFilterChange={handleFilterChange}
