@@ -49,7 +49,7 @@ function App() {
       )}
       {filteredCountries.length > 1 && filteredCountries.length <= 10 && (
         filteredCountries.map(countryName =>
-          <CountryName key={countryName} name={countryName} />
+          <CountryName key={countryName} name={countryName} showInfo={() => setFilterName(countryName)} />
         )
       )}
 
