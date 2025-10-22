@@ -3,7 +3,7 @@ const CountryFilter = ({
     handleFilterChange
 }) => (
   <div>
-    <li>find countries <input value={filterName} onChange={handleFilterChange} /></li>
+    <p>find countries <input value={filterName} onChange={handleFilterChange} /></p>
   </div>
 )
 

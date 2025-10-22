@@ -5,8 +5,8 @@ import countryService from './services/countries'
 
 function App() {
   const [allCountries, setAllCountries] = useState([])
+  const [countryDetails, setCountryDetails] = useState(null)
   const [filterName, setFilterName] = useState('')
-  const [countryDetails, setCountryDetails] = useState(null);
 
   const filteredCountries = allCountries.filter(
     c => c.toLowerCase()
@@ -24,10 +24,9 @@ function App() {
 
   useEffect(() => {
     if (!country) {
-      setCountryDetails(null);
-      return;
+      setCountryDetails(null)
+      return
     }
-
     countryService
       .getCountry(country)
       .then(data => {
@@ -46,7 +45,7 @@ function App() {
       <CountryFilter filterName={filterName} handleFilterChange={handleFilterChange} />
 
       {filteredCountries.length > 10 && (
-        <li>Too many matches, specify another filter.</li>
+        <p>Too many matches, specify another filter.</p>
       )}
       {filteredCountries.length > 1 && filteredCountries.length <= 10 && (
         filteredCountries.map(countryName =>
@@ -55,12 +54,28 @@ function App() {
       )}
 
       {filteredCountries.length === 1 && (
-        //code to setCo
-        <h2>{filteredCountries[0]}</h2>
+        <div>
+          <h1>{filteredCountries[0]}</h1>
+            {countryDetails && (
+              <div>
+                <li>Capital: {countryDetails.capital}</li>
+                <li>Area: {countryDetails.area}</li>
+
+                <h2>Languages</h2>
+                <ul>
+                  {Object.values(countryDetails.languages).map(lang => (
+                    <li key={lang}>{lang}</li>
+                  ))}
+                </ul>
+
+                <img src={countryDetails.flags.png} width="200" />
+              </div>
+            )}
+        </div>   
       )}
 
       {filteredCountries.length === 0 && (
-        <li>No match found.</li>
+        <p>No match found.</p>
       )}
     </div>
   )
