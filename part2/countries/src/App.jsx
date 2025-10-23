@@ -2,11 +2,17 @@ import { useEffect, useState } from 'react'
 import CountryFilter from './components/CountryFilter'
 import CountryName from './components/CountryName'
 import countryService from './services/countries'
+import weatherService from './services/weather'
 
 function App() {
+  const weather_api_key = import.meta.env.VITE_WEATHER_API_KEY
+  const weather_icon_base_url = "https://openweathermap.org/img/wn/"
   const [allCountries, setAllCountries] = useState([])
-  const [countryDetails, setCountryDetails] = useState(null)
   const [filterName, setFilterName] = useState('')
+  const [countryDetails, setCountryDetails] = useState(null)
+  const [weather, setWeather] = useState(null)
+
+  const handleFilterChange = (event) => {setFilterName(event.target.value)}
 
   const filteredCountries = allCountries.filter(
     c => c.toLowerCase()
@@ -30,15 +36,29 @@ function App() {
     countryService
       .getCountry(country)
       .then(data => {
-        console.log('Fetched country data:', data);
-        setCountryDetails(data);
+        console.log('Fetched country data:', data)
+        setCountryDetails(data)
       })
       .catch(error => {
-        console.error('Error fetching country data:', error);
-      });
+        console.error('Error fetching country data:', error)
+      })
   }, [country])
 
-  const handleFilterChange = (event) => {setFilterName(event.target.value)}
+  useEffect(() => {
+    if (!countryDetails) return
+
+    const [lat, lng] = countryDetails.latlng
+
+    weatherService
+      .getWeather(lat, lng, weather_api_key)
+      .then(data => {
+        console.log('Fetched weather data:', data)
+        setWeather(data)
+      })
+      .catch(error => {
+        console.error('Error fetching weather data:', error)
+      })
+  }, [countryDetails])
 
   return (
     <div>
@@ -67,8 +87,16 @@ function App() {
                     <li key={lang}>{lang}</li>
                   ))}
                 </ul>
-
                 <img src={countryDetails.flags.png} width="200" />
+
+                <h2>Weather in {countryDetails.capital}</h2>
+                  {weather && (
+                    <div>
+                      <p>Temperature {weather.main.temp} Celcius</p>
+                      <img src={`${weather_icon_base_url}${weather.weather[0].icon}@2x.png`} />
+                      <p>Wind {weather.wind.speed} m/s</p>
+                    </div>
+                  )}
               </div>
             )}
         </div>   
