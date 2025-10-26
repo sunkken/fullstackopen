@@ -1,0 +1,19 @@
+GET http://localhost:3001/api/notes
+
+### Create a New Note
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": "JavaScript is a versatile language",
+  "important": true
+}
+
+### Create an empty note (should fail)
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": "",
+  "important": true
+}
