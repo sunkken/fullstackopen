@@ -18,3 +18,19 @@ Content-Type: application/json
   "name": "Matti Mattinen",
   "number": "123456"
 }
+
+### Add a person with missing name
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "number": "123456"
+}
+
+### Add a person with missing number
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Matti Mattinen"
+}
