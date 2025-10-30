@@ -2,9 +2,6 @@ const express = require('express')
 const morgan = require('morgan')
 const app = express()
 
-app.use(express.json())
-app.use(morgan('tiny'))
-
 let persons = [
     { 
       id: "1",
@@ -28,9 +25,17 @@ let persons = [
     }
 ]
 
-const generateId = () => {
-  return String(Math.floor(Math.random() * 1000000000))
-}
+app.use(express.json())
+
+morgan.token('body', (req) => JSON.stringify(req.body))
+
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    morgan(':method :url :status :res[content-length] - :response-time ms - :body')(req, res, next)
+  } else {
+    morgan('tiny')(req, res, next)
+  }
+})
 
 app.get('/info', (request, response) => {
   const requestTime = new Date()
@@ -55,19 +60,9 @@ app.get('/api/persons/:id', (request, response) => {
   }
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  
-  if (!persons.find(person => person.id === id)) {
-    return response.status(404).json({
-      error: 'person not found'
-    })
-  }
-
-  persons = persons.filter(person => person.id !== id)
-
-  response.status(204).end()
-})
+const generateId = () => {
+  return String(Math.floor(Math.random() * 1000000000))
+}
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -93,6 +88,20 @@ app.post('/api/persons', (request, response) => {
 
   persons = persons.concat(person)
   response.json(person)
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  
+  if (!persons.find(person => person.id === id)) {
+    return response.status(404).json({
+      error: 'person not found'
+    })
+  }
+
+  persons = persons.filter(person => person.id !== id)
+
+  response.status(204).end()
 })
 
 const PORT = 3001
