@@ -1,4 +1,14 @@
+### Retrieve All Notes
 GET http://localhost:3001/api/notes
+
+### Retrieve a Note by ID
+GET http://localhost:3001/api/notes/690915d57353431d9c4f386a
+
+### Retrieve a Non-Existent Note (should return 404)
+GET http://localhost:3001/api/notes/000000000000000000000000
+
+### Retrieve a Mal-Formatted Note ID (should return 400)
+GET http://localhost:3001/api/notes/12345
 
 ### Create a New Note
 POST http://localhost:3001/api/notes
@@ -16,4 +26,22 @@ Content-Type: application/json
 {
   "content": "",
   "important": true
+}
+
+### Delete a Note by ID
+DELETE http://localhost:3001/api/notes/690a19a290327fcba92fca5b
+
+### Delete a Non-Existent Note (should return 204)
+DELETE http://localhost:3001/api/notes/000000000000000000000000
+
+### Delete a Mal-Formatted Note ID (should return 400)
+DELETE http://localhost:3001/api/notes/12345
+
+### Update a Note by ID
+PUT http://localhost:3001/api/notes/690915d57353431d9c4f386a
+Content-Type: application/json
+
+{
+  "content": "Updated note content",
+  "important": false
 }
