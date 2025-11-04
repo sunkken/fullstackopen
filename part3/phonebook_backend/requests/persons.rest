@@ -7,8 +7,12 @@ GET http://localhost:3001/api/persons
 ### Get a person by ID
 GET http://localhost:3001/api/persons/690928344e72c6b226be527b
 
-### Delete a person by ID
-DELETE http://localhost:3001/api/persons/1
+### Get a person by non-existing ID
+GET http://localhost:3001/api/persons/123456789012345678901234
+
+### Get a person by malformatted ID
+GET http://localhost:3001/api/persons/12345
+
 
 ### Add a new person
 POST http://localhost:3001/api/persons
@@ -34,3 +38,6 @@ Content-Type: application/json
 {
   "name": "Matti Mattinen"
 }
+
+### Delete a person by ID
+DELETE http://localhost:3001/api/persons/1
