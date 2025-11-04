@@ -39,5 +39,14 @@ Content-Type: application/json
   "name": "Matti Mattinen"
 }
 
+### Update a person by ID
+PUT http://localhost:3001/api/persons/690928344e72c6b226be527b
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "040-2345823"
+}
+
 ### Delete a person by ID
 DELETE http://localhost:3001/api/persons/690a41eac61827f332454527

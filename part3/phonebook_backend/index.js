@@ -5,14 +5,22 @@ const Person = require('./models/person')
 
 const app = express()
 
-morgan.token('body', (req) => JSON.stringify(req.body))
-app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    morgan(':method :url :status :res[content-length] - :response-time ms - :body')(req, res, next)
-  } else {
-    morgan('tiny')(req, res, next)
-  }
-})
+morgan.token('body', req => JSON.stringify(req.body))
+app.use(
+  morgan((tokens, req, res) => {
+    if (req.method === 'POST') {
+      return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res), 'ms -',
+        tokens.body(req, res)
+      ].join(' ')
+    }
+    return null
+  })
+)
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
@@ -67,21 +75,33 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-/*   const existingPerson = persons.find(person => person.name === body.name)
-  if (existingPerson) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  } */
-
   const person = new Person({
     name: body.name,
     number: body.number,
   })
 
-  person.save().then(savedNote => {
-    response.json(person)
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
   })
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const { name, number } = request.body
+
+  Person.findById(request.params.id)
+    .then(person => {
+      if (!person) {
+        return response.status(404).end()
+      }
+
+      person.name = name
+      person.number = number
+
+      return person.save().then(updatedPerson => {
+        response.json(updatedPerson)
+      })
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
