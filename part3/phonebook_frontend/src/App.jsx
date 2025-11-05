@@ -42,8 +42,13 @@ const App = () => {
             setNotification({message: `Updated ${newName}'s number`, isError: false})
           })
           .catch(error => {
-            setNotification({message: `Information of '${newName}' has already been removed from server`, isError: true})  
-            setPersons(persons.filter(p => p.id !== existingPerson.id))
+            if (error.response && error.response.status === 404) {
+              setNotification({message: `Information of '${newName}' has already been removed from server`, isError: true})  
+              setPersons(persons.filter(p => p.id !== existingPerson.id))
+            } else {
+              console.log(error.response.data.error)
+              setNotification({message: error.response.data.error, isError: true})
+            }
           })
       }
     } else {
@@ -56,6 +61,10 @@ const App = () => {
           setNewName('')
           setNewNumber('')
           setNotification({message: `Added ${newName}`, isError: false})
+        })
+        .catch(error => {
+          console.log(error.response.data.error)
+          setNotification({message: error.response.data.error, isError: true})
         })
     }
     setTimeout(() => {
