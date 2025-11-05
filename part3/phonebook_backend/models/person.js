@@ -6,7 +6,7 @@ const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
 mongoose.connect(url)
-  .then(result => {
+  .then(() => {
     console.log('connected to MongoDB')
   })
   .catch(error => {
@@ -26,7 +26,7 @@ const personSchema = new mongoose.Schema({
       validator: function(v) {
         return /^\d{2,3}-\d+$/.test(v)
       },
-      message: props => 'number format is invalid (should be XX-XXXXXXX or XXX-XXXXXXX)'
+      message: props => `${props.value} invalid format (should be XX-XXXXXXX or XXX-XXXXXXX)`
     },
     required: [true, 'phone number required']
   }

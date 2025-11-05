@@ -58,10 +58,11 @@ app.post('/api/notes', (request, response, next) => {
     important: body.important || false,
   })
 
-  note.save().then(savedNote => {
-    response.json(savedNote)
-  })
-  .catch(error => next(error))
+  note.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    })
+    .catch(error => next(error))
 })
 
 app.put('/api/notes/:id', (request, response, next) => {
@@ -85,7 +86,7 @@ app.put('/api/notes/:id', (request, response, next) => {
 
 app.delete('/api/notes/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
