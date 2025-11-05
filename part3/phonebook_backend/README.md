@@ -1,4 +1,4 @@
-# fullstack_phonebook
+# phonebookApp
 
 This repository is a multi-chapter exercise as part of the **Fullstack Open** course (MOOC.fi).
 
