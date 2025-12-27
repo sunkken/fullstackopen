@@ -1,0 +1,17 @@
+{
+  "name": "bloglist-backend",
+  "version": "0.0.1",
+  "description": "Backend for blog list application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "author": "Toni Sundqvist",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.2"
+  }
+}
