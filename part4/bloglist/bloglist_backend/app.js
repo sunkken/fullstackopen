@@ -1,19 +1,14 @@
 const express = require('express')
 const mongoose = require('mongoose')
-require('dotenv').config()
+const config = require('./utils/config')
+const logger = require('./utils/logger')
+const Blog = require('./models/blog')
 
 const app = express()
 
-const blogSchema = mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number,
-})
+logger.info('connecting to', config.MONGODB_URI)
 
-const Blog = mongoose.model('Blog', blogSchema)
-
-const mongoUrl = process.env.MONGODB_URI
+const mongoUrl = config.MONGODB_URI
 mongoose.connect(mongoUrl, { family: 4 })
 
 app.use(express.json())
