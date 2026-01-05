@@ -1,7 +1,7 @@
 const { test, describe } = require('node:test')
 const assert = require('node:assert')
 const listHelper = require('../utils/list_helper')
-const { listWithOneBlog, listWithManyBlogs } = require('./blogs_for_test.json')
+const { listWithOneBlog, listWithManyBlogs, emptyList } = require('./test_helper')
 
 describe('dummy', () => {
   test('dummy returns one', () => {
@@ -33,9 +33,7 @@ describe('total likes', () => {
 
 describe('favorite blog', () => { 
   test('of empty list is null', () => {
-      const blogs = []
-
-      const result = listHelper.favoriteBlog(blogs)
+      const result = listHelper.favoriteBlog([])
       assert.deepStrictEqual(result, null)
   })
 
@@ -49,4 +47,27 @@ describe('favorite blog', () => {
       assert.deepStrictEqual(result, listWithManyBlogs[2])
   })
 
+})
+
+describe('most blogs', () => {
+  test('of empty list is null', () => {
+      const result = listHelper.mostBlogs(emptyList)
+      assert.deepStrictEqual(result, null)
+  })
+
+  test('when list has only one blog equals that author with count 1', () => {
+      const result = listHelper.mostBlogs(listWithOneBlog)
+      assert.deepStrictEqual(result, {
+        author: 'Edsger W. Dijkstra',
+        blogs: 1,
+      })
+  })
+
+  test('of a bigger list is the author with most blogs', () => {
+      const result = listHelper.mostBlogs(listWithManyBlogs)
+      assert.deepStrictEqual(result, {
+        author: 'Robert C. Martin',
+        blogs: 3,
+      })
+  })
 })
