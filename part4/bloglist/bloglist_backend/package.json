@@ -23,6 +23,6 @@
     "@stylistic/eslint-plugin": "^5.6.1",
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
-    "supertest": "^7.2.1"
+    "supertest": "^7.1.4"
   }
 }
