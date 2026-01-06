@@ -1,7 +1,7 @@
 const { test, describe } = require('node:test')
 const assert = require('node:assert')
 const listHelper = require('../utils/list_helper')
-const { listWithOneBlog, listWithManyBlogs, emptyList } = require('./test_helper')
+const { listWithOneBlog, listWithManyBlogs } = require('./test_helper')
 
 describe('dummy', () => {
   test('dummy returns one', () => {
@@ -51,7 +51,7 @@ describe('favorite blog', () => {
 
 describe('most blogs', () => {
   test('of empty list is null', () => {
-    const result = listHelper.mostBlogs(emptyList)
+    const result = listHelper.mostBlogs([])
     assert.deepStrictEqual(result, null)
   })
 
@@ -74,7 +74,7 @@ describe('most blogs', () => {
 
 describe('most likes', () => {
   test('of empty list is null', () => {
-    const result = listHelper.mostLikes(emptyList)
+    const result = listHelper.mostLikes([])
     assert.deepStrictEqual(result, null)
   })
 

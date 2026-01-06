@@ -3,7 +3,6 @@ const blogs = require('./blogs_for_list_helper_test.json')
 
 const listWithOneBlog = blogs.listWithOneBlog
 const listWithManyBlogs = blogs.listWithManyBlogs
-const emptyList = []
 
 const nonExistingId = async () => {
   const blog = new Blog({ title: 'willremovethissoon', author: 'temp', url: 'http://tempurl.com', likes: 0 })
@@ -21,7 +20,6 @@ const blogsInDb = async () => {
 module.exports = {
   listWithOneBlog,
   listWithManyBlogs,
-  emptyList,
   nonExistingId,
   blogsInDb,
 }
