@@ -1,4 +1,4 @@
-const blogs = require('./blogs_for_test.json')
+const blogs = require('./blogs_for_list_helper_test.json')
 
 const listWithOneBlog = blogs.listWithOneBlog
 const listWithManyBlogs = blogs.listWithManyBlogs
