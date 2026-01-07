@@ -26,6 +26,28 @@ describe('when there are initially some blogs saved', () => {
 
     assert.strictEqual(response.body.length, helper.listWithManyBlogs.length)
   })
+
+  test('blogs expose id', async () => {
+    const res = await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    for (const blog of res.body) {
+      assert.ok(blog.id, 'expected blog.id to be defined')
+    }
+  })
+
+  test('blog ids are unique', async () => {
+    const res = await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const ids = res.body.map(b => b.id)
+    const uniqueIds = new Set(ids)
+    assert.strictEqual(uniqueIds.size, ids.length, 'expected all blog ids to be unique')
+  })
 })
 
 after(async () => {
