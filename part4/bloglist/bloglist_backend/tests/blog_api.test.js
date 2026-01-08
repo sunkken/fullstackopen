@@ -48,6 +48,27 @@ describe('when there are initially some blogs saved', () => {
     const uniqueIds = new Set(ids)
     assert.strictEqual(uniqueIds.size, ids.length, 'expected all blog ids to be unique')
   })
+
+  test('a valid blog can be added', async () => {
+    const newBlog = {
+      title: 'New Blog Post',
+      author: 'Test Author',
+      url: 'http://example.com/new-blog-post',
+      likes: 0
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length + 1)
+
+    const titles = blogsAtEnd.map(b => b.title)
+    assert.ok(titles.includes('New Blog Post'))
+  })
 })
 
 after(async () => {
