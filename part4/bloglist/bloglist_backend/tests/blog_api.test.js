@@ -69,6 +69,24 @@ describe('when there are initially some blogs saved', () => {
     const titles = blogsAtEnd.map(b => b.title)
     assert.ok(titles.includes('New Blog Post'))
   })
+
+  test('an added blog without likes defaults to 0 likes', async () => {
+    const newBlog = {
+      title: 'Blog Without Likes',
+      author: 'Test Author',
+      url: 'http://example.com/blog-without-likes'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    const addedBlog = blogsAtEnd.find(b => b.title === 'Blog Without Likes')
+    assert.strictEqual(addedBlog.likes, 0)
+  })
 })
 
 after(async () => {
