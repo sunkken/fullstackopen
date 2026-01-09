@@ -70,7 +70,7 @@ describe('when there are initially some blogs saved', () => {
     assert.ok(titles.includes('New Blog Post'))
   })
 
-  test('an added blog without likes defaults to 0 likes', async () => {
+  test('adding a blog without likes defaults to 0 likes', async () => {
     const newBlog = {
       title: 'Blog Without Likes',
       author: 'Test Author',
@@ -86,6 +86,38 @@ describe('when there are initially some blogs saved', () => {
     const blogsAtEnd = await helper.blogsInDb()
     const addedBlog = blogsAtEnd.find(b => b.title === 'Blog Without Likes')
     assert.strictEqual(addedBlog.likes, 0)
+  })
+
+  test('adding a blog without title returns 400 Bad Request', async () => {
+    const newBlog = {
+      author: 'Test Author',
+      url: 'http://example.com/blog-without-title',
+      likes: 5
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+  })
+
+  test('adding a blog without url returns 400 Bad Request', async () => {
+    const newBlog = {
+      title: 'Blog Without URL',
+      author: 'Test Author',
+      likes: 5
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
   })
 })
 
