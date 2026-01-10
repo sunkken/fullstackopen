@@ -14,42 +14,44 @@ describe('when there are initially some blogs saved', () => {
     await Blog.insertMany(helper.listWithManyBlogs)
   })
 
-  test('blogs are returned as json', async () => {
-    await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
+  describe('retrieving blogs', () => {
+    test('returns blogs as json', async () => {
+      await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    })
+
+    test('returns all blogs', async () => {
+      const response = await api.get('/api/blogs')
+
+      assert.strictEqual(response.body.length, helper.listWithManyBlogs.length)
+    })
+
+    test('returns blogs with id property', async () => {
+      const res = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      for (const blog of res.body) {
+        assert.ok(blog.id, 'expected blog.id to be defined')
+      }
+    })
+
+    test('returns blogs with unique id properties', async () => {
+      const res = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      const ids = res.body.map(b => b.id)
+      const uniqueIds = new Set(ids)
+      assert.strictEqual(uniqueIds.size, ids.length, 'expected all blog ids to be unique')
+    })
   })
 
-  test('all blogs are returned', async () => {
-    const response = await api.get('/api/blogs')
-
-    assert.strictEqual(response.body.length, helper.listWithManyBlogs.length)
-  })
-
-  test('blogs expose id', async () => {
-    const res = await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    for (const blog of res.body) {
-      assert.ok(blog.id, 'expected blog.id to be defined')
-    }
-  })
-
-  test('blog ids are unique', async () => {
-    const res = await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    const ids = res.body.map(b => b.id)
-    const uniqueIds = new Set(ids)
-    assert.strictEqual(uniqueIds.size, ids.length, 'expected all blog ids to be unique')
-  })
-
-  describe('addition of a new blog', () => {
+  describe('adding a new blog', () => {
     test('succeeds with valid data', async () => {
       const newBlog = {
         title: 'New Blog Post',
@@ -122,7 +124,7 @@ describe('when there are initially some blogs saved', () => {
     })
   })
 
-  describe('deletion of a blog', () => {
+  describe('deleting a blog', () => {
     test('succeeds with status code 204 if id is valid', async () => {
       const blogsAtStart = await helper.blogsInDb()
       const blogToDelete = blogsAtStart[0]
@@ -137,6 +139,58 @@ describe('when there are initially some blogs saved', () => {
       assert.ok(!ids.includes(blogToDelete.id))
 
       assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+    })
+
+    test('succeeds with status code 204 even if blog does not exist', async () => {
+      const nonExistingId = await helper.nonExistingId()
+
+      await api
+        .delete(`/api/blogs/${nonExistingId}`)
+        .expect(204)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+    })
+  })
+
+  describe('updating a blog', () => {
+    test('succeeds with status code 200 if id is valid', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToUpdate = blogsAtStart[0]
+
+      const updatedData = {
+        title: 'Updated Title',
+        author: 'Updated Author',
+        url: 'http://example.com/updated-url',
+        likes: 10
+      }
+
+      const response = await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(updatedData)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(response.body.title, updatedData.title)
+      assert.strictEqual(response.body.author, updatedData.author)
+      assert.strictEqual(response.body.url, updatedData.url)
+      assert.strictEqual(response.body.likes, updatedData.likes)
+    })
+
+    test('fails with status code 404 if blog does not exist', async () => {
+      const nonExistingId = await helper.nonExistingId()
+
+      const updatedData = {
+        title: 'Updated Title',
+        author: 'Updated Author',
+        url: 'http://example.com/updated-url',
+        likes: 10
+      }
+
+      await api
+        .put(`/api/blogs/${nonExistingId}`)
+        .send(updatedData)
+        .expect(404)
     })
   })
 })
