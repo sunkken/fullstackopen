@@ -14,6 +14,12 @@ const api = supertest(app)
 describe('when there is initially some notes saved', () => {
   beforeEach(async () => {
     await Note.deleteMany({})
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    await user.save()
+
     await Note.insertMany(helper.initialNotes)
   })
 
@@ -68,6 +74,7 @@ describe('when there is initially some notes saved', () => {
       const newNote = {
         content: 'async/await simplifies making async calls',
         important: true,
+        userId: (await helper.usersInDb())[0].id,
       }
 
       await api
@@ -161,6 +168,48 @@ describe('when there is initially one user in db', () => {
     const usersAtEnd = await helper.usersInDb()
     assert(result.body.error.includes('expected `username` to be unique'))
 
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+
+  test('creation fails with proper statuscode and message if username too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'ab',
+      name: 'Short User',
+      password: 'salainen',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('username must be at least 3 characters long'))
+
+    const usersAtEnd = await helper.usersInDb()
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+
+  test('creation fails with proper statuscode and message if password too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'newuser',
+      name: 'New User',
+      password: 'ab',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('password must be at least 3 characters long'))
+
+    const usersAtEnd = await helper.usersInDb()
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 })

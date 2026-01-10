@@ -15,8 +15,9 @@ POST http://localhost:3001/api/notes
 Content-Type: application/json
 
 {
-  "content": "Ensure that everything still works",
-  "important": true
+  "content": "Add another note created by REST API",
+  "important": true,
+  "userId": "6962851a7d6d70b6e1d9716c"
 }
 
 ### Create an empty note (should fail)
@@ -25,7 +26,8 @@ Content-Type: application/json
 
 {
   "content": "",
-  "important": true
+  "important": true,
+  "userId": "6962851a7d6d70b6e1d9716c"
 }
 
 ### Delete a Note by ID
@@ -43,7 +45,8 @@ Content-Type: application/json
 
 {
   "content": "Updated note content",
-  "important": false
+  "important": false,
+  "userId": "6962851a7d6d70b6e1d9716c"
 }
 
 ### Get all Users
