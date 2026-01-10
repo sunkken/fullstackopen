@@ -49,75 +49,95 @@ describe('when there are initially some blogs saved', () => {
     assert.strictEqual(uniqueIds.size, ids.length, 'expected all blog ids to be unique')
   })
 
-  test('a valid blog can be added', async () => {
-    const newBlog = {
-      title: 'New Blog Post',
-      author: 'Test Author',
-      url: 'http://example.com/new-blog-post',
-      likes: 0
-    }
+  describe('addition of a new blog', () => {
+    test('succeeds with valid data', async () => {
+      const newBlog = {
+        title: 'New Blog Post',
+        author: 'Test Author',
+        url: 'http://example.com/new-blog-post',
+        likes: 0
+      }
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
-    
-    const blogsAtEnd = await helper.blogsInDb()
-    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length + 1)
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+      
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length + 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
-    assert.ok(titles.includes('New Blog Post'))
+      const titles = blogsAtEnd.map(b => b.title)
+      assert.ok(titles.includes('New Blog Post'))
+    })
+
+    test('defaults to 0 likes if likes property is missing', async () => {
+      const newBlog = {
+        title: 'Blog Without Likes',
+        author: 'Test Author',
+        url: 'http://example.com/blog-without-likes'
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      const addedBlog = blogsAtEnd.find(b => b.title === 'Blog Without Likes')
+      assert.strictEqual(addedBlog.likes, 0)
+    })
+
+    test('returns 400 Bad Request if title is missing', async () => {
+      const newBlog = {
+        author: 'Test Author',
+        url: 'http://example.com/blog-without-title',
+        likes: 5
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+      
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+    })
+
+    test('returns 400 Bad Request if url is missing', async () => {
+      const newBlog = {
+        title: 'Blog Without URL',
+        author: 'Test Author',
+        likes: 5
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+      
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+    })
   })
 
-  test('adding a blog without likes defaults to 0 likes', async () => {
-    const newBlog = {
-      title: 'Blog Without Likes',
-      author: 'Test Author',
-      url: 'http://example.com/blog-without-likes'
-    }
+  describe('deletion of a blog', () => {
+    test('succeeds with status code 204 if id is valid', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToDelete = blogsAtStart[0]
+      
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(204)
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+      const blogsAtEnd = await helper.blogsInDb()
 
-    const blogsAtEnd = await helper.blogsInDb()
-    const addedBlog = blogsAtEnd.find(b => b.title === 'Blog Without Likes')
-    assert.strictEqual(addedBlog.likes, 0)
-  })
+      const ids = blogsAtEnd.map(b => b.id)
+      assert.ok(!ids.includes(blogToDelete.id))
 
-  test('adding a blog without title returns 400 Bad Request', async () => {
-    const newBlog = {
-      author: 'Test Author',
-      url: 'http://example.com/blog-without-title',
-      likes: 5
-    }
-
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(400)
-    
-    const blogsAtEnd = await helper.blogsInDb()
-    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
-  })
-
-  test('adding a blog without url returns 400 Bad Request', async () => {
-    const newBlog = {
-      title: 'Blog Without URL',
-      author: 'Test Author',
-      likes: 5
-    }
-
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(400)
-    
-    const blogsAtEnd = await helper.blogsInDb()
-    assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+      assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+    })
   })
 })
 
