@@ -1,0 +1,41 @@
+### Retrieve All Notes (public)
+GET http://localhost:3001/api/notes
+
+### Retrieve a Note by ID (public)
+GET http://localhost:3001/api/notes/690915d57353431d9c4f386a
+
+### Retrieve a Non-Existent Note (should return 404)
+GET http://localhost:3001/api/notes/000000000000000000000000
+
+### Retrieve a Mal-Formatted Note ID (should return 400)
+GET http://localhost:3001/api/notes/12345
+
+### Create a New Note (unauthorized, expect 401)
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": "Unauthorized create attempt",
+  "important": true
+}
+
+### Create an empty note (unauthorized, expect 401)
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+  "content": "",
+  "important": true
+}
+
+### Delete a Note by ID (public)
+DELETE http://localhost:3001/api/notes/690a19a290327fcba92fca5b
+
+### Update a Note by ID (public)
+PUT http://localhost:3001/api/notes/690915d57353431d9c4f386a
+Content-Type: application/json
+
+{
+  "content": "Unauthorized update attempt",
+  "important": false
+}

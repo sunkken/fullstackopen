@@ -1,0 +1,55 @@
+### Login (chained)
+# @name login
+POST http://localhost:3001/api/login
+Content-Type: application/json
+
+{
+  "username": "mluukkai",
+  "password": "salainen"
+}
+
+### Create a New Note using login token
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "content": "Add another note created by REST API",
+  "important": true
+}
+
+### Get Notes using login token
+GET http://localhost:3001/api/notes
+Authorization: Bearer {{login.response.body.token}}
+
+### Create an empty note (should return 400)
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "content": "",
+  "important": true
+}
+
+### Delete a Note by ID
+DELETE http://localhost:3001/api/notes/690a19a290327fcba92fca5b
+Authorization: Bearer {{login.response.body.token}}
+
+### Delete a Non-Existent Note (should return 204)
+DELETE http://localhost:3001/api/notes/000000000000000000000000
+Authorization: Bearer {{login.response.body.token}}
+
+### Delete a Mal-Formatted Note ID (should return 400)
+DELETE http://localhost:3001/api/notes/12345
+Authorization: Bearer {{login.response.body.token}}
+
+### Update a Note by ID
+PUT http://localhost:3001/api/notes/690915d57353431d9c4f386a
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "content": "Updated note content",
+  "important": false
+}
