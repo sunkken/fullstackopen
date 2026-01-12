@@ -14,12 +14,20 @@ describe('when there are initially two users saved', () => {
   beforeEach(async () => {
     await User.deleteMany({})
     
-    const passwordHash = await bcrypt.hash('sekret', 10)
-    const user = new User({ username: 'root', name: 'Superuser', passwordHash })
+    const pwHash = await bcrypt.hash('sekret', 10)
+    const user = new User({
+      username: 'root',
+      name: 'Superuser',
+      passwordHash: pwHash
+    })
     await user.save()
 
-    const passwordHash2 = await bcrypt.hash('sekret2', 10)
-    const user2 = new User({ username: 'user2', name: 'Test User', passwordHash: passwordHash2 })
+    const pwHash2 = await bcrypt.hash('sekret2', 10)
+    const user2 = new User({
+      username: 'user2',
+      name: 'Test User',
+      passwordHash: pwHash2
+    })
     await user2.save()
   })
 
@@ -81,6 +89,69 @@ describe('when there are initially two users saved', () => {
 
       const usernames = usersAtEnd.map(u => u.username)
       assert(usernames.includes(newUser.username))
+    })
+
+    test('fails with status code 400 if username is too short', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'ab',
+        name: 'Short Username',
+        password: 'validpassword',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'username must be at least 3 characters long')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+    test('fails with status code 400 if password is too short', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'validusername',
+        name: 'Short Password',
+        password: 'pw',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'password must be at least 3 characters long')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+    test('fails with status code 400 if username already exists', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'root',
+        name: 'Superuser',
+        password: 'sekret',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'username must be unique')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
     })
   })
 })

@@ -1,7 +1,7 @@
 ### Get all users with their blogs
 GET http://localhost:3003/api/users
 
-### Create a new user
+### Create a new user (should fail if already exists)
 POST http://localhost:3003/api/users
 Content-Type: application/json
 
@@ -9,4 +9,24 @@ Content-Type: application/json
   "username": "newuser",
   "name": "New User",
   "password": "securepassword"
+}
+
+### Create user with too short username (should fail)
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "username": "ab",
+  "name": "Short Username",
+  "password": "securepassword"
+}
+
+### Create user with too short password (should fail)
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "username": "validuser",
+  "name": "Short Password",
+  "password": "ab"
 }
