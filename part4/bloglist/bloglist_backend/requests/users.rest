@@ -1,0 +1,12 @@
+### Get all users with their blogs
+GET http://localhost:3003/api/users
+
+### Create a new user
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "name": "New User",
+  "password": "securepassword"
+}
