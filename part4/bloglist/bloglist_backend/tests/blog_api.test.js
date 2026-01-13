@@ -1,17 +1,153 @@
 const assert = require('node:assert')
+const bcrypt = require('bcrypt')
 const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
-describe('when there are initially some blogs saved', () => {
+describe('when there are initially some blogs and users saved', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    const pwHash = await bcrypt.hash('sekret', 10)
+    const pwHash2 = await bcrypt.hash('sekret2', 10)
+    const user = new User({ username: 'root', passwordHash: pwHash })
+    const user2 = new User({ username: 'root2', passwordHash: pwHash2 })
+    await user.save()
+    await user2.save()
+
     await Blog.insertMany(helper.listWithManyBlogs)
+  })
+
+describe('retrieving users', () => {
+    test('returns users as json', async () => {
+      await api
+        .get('/api/users')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    })
+
+    test('returns all users', async () => {
+      const response = await api.get('/api/users')
+
+      assert.strictEqual(response.body.length, 2)
+    })
+
+    test('returns users with id property', async () => {
+      const res = await api
+        .get('/api/users')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      for (const user of res.body) {
+        assert.ok(user.id, 'expected user.id to be defined')
+      }
+    })
+
+    test('returns users with unique id properties', async () => {
+      const res = await api
+        .get('/api/users')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      const ids = res.body.map(u => u.id)
+      const uniqueIds = new Set(ids)
+      assert.strictEqual(uniqueIds.size, ids.length, 'expected all user ids to be unique')
+    })
+  })
+
+  describe('creating a user', () => {
+    test('succeeds with a fresh username', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'newuser',
+        name: 'New User',
+        password: 'password123',
+      }
+      
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+      
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+
+      const usernames = usersAtEnd.map(u => u.username)
+      assert(usernames.includes(newUser.username))
+    })
+
+    test('fails with status code 400 if username is too short', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'ab',
+        name: 'Short Username',
+        password: 'validpassword',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'username must be at least 3 characters long')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+    test('fails with status code 400 if password is too short', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'validusername',
+        name: 'Short Password',
+        password: 'pw',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'password must be at least 3 characters long')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+    test('fails with status code 400 if username already exists', async () => {
+      const usersAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'root',
+        name: 'Superuser',
+        password: 'sekret',
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      assert.strictEqual(result.body.error, 'username must be unique')
+
+      const usersAtEnd = await helper.usersInDb()
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
   })
 
   describe('retrieving blogs', () => {
@@ -57,7 +193,8 @@ describe('when there are initially some blogs saved', () => {
         title: 'New Blog Post',
         author: 'Test Author',
         url: 'http://example.com/new-blog-post',
-        likes: 0
+        likes: 0,
+        userId: (await helper.usersInDb())[0].id
       }
 
       await api
@@ -77,7 +214,8 @@ describe('when there are initially some blogs saved', () => {
       const newBlog = {
         title: 'Blog Without Likes',
         author: 'Test Author',
-        url: 'http://example.com/blog-without-likes'
+        url: 'http://example.com/blog-without-likes',
+        userId: (await helper.usersInDb())[0].id
       }
 
       await api
@@ -95,7 +233,8 @@ describe('when there are initially some blogs saved', () => {
       const newBlog = {
         author: 'Test Author',
         url: 'http://example.com/blog-without-title',
-        likes: 5
+        likes: 5,
+        userId: (await helper.usersInDb())[0].id
       }
 
       await api
@@ -111,7 +250,8 @@ describe('when there are initially some blogs saved', () => {
       const newBlog = {
         title: 'Blog Without URL',
         author: 'Test Author',
-        likes: 5
+        likes: 5,
+        userId: (await helper.usersInDb())[0].id
       }
 
       await api
