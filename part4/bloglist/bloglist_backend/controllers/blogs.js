@@ -5,23 +5,15 @@ const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
-  .find({}).populate('user', { username: 1, name: 1 })
+    .find({}).populate('user', { username: 1, name: 1 })
 
   response.json(blogs)
 })
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
-
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' })
   }
@@ -59,7 +51,7 @@ blogsRouter.put('/:id', async (request, response) => {
   const { title, author, url, likes } = request.body
 
   const blog = await Blog.findById(request.params.id)
-  
+
   if (!blog) {
     return response.status(404).end()
   }

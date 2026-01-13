@@ -11,6 +11,8 @@ const User = require('../models/user')
 
 const api = supertest(app)
 
+let token
+
 describe('when there are initially some blogs and users saved', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
@@ -32,7 +34,7 @@ describe('when there are initially some blogs and users saved', () => {
     await Blog.insertMany(helper.listWithManyBlogs)
   })
 
-describe('retrieving users', () => {
+  describe('retrieving users', () => {
     test('returns users as json', async () => {
       await api
         .get('/api/users')
@@ -78,13 +80,13 @@ describe('retrieving users', () => {
         name: 'New User',
         password: 'password123',
       }
-      
+
       await api
         .post('/api/users')
         .send(newUser)
         .expect(201)
         .expect('Content-Type', /application\/json/)
-      
+
       const usersAtEnd = await helper.usersInDb()
       assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
 
@@ -209,7 +211,7 @@ describe('retrieving users', () => {
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
-      
+
       const blogsAtEnd = await helper.blogsInDb()
       assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length + 1)
 
@@ -250,7 +252,7 @@ describe('retrieving users', () => {
         .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
-      
+
       const blogsAtEnd = await helper.blogsInDb()
       assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
     })
@@ -268,7 +270,7 @@ describe('retrieving users', () => {
         .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
-      
+
       const blogsAtEnd = await helper.blogsInDb()
       assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
     })
@@ -278,7 +280,7 @@ describe('retrieving users', () => {
     test('succeeds with status code 204 if id is valid', async () => {
       const blogsAtStart = await helper.blogsInDb()
       const blogToDelete = blogsAtStart[0]
-      
+
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
         .expect(204)
