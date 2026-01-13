@@ -329,6 +329,25 @@ describe('when there are initially some blogs and users saved', () => {
       assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
     })
 
+    test('fails with status code 403 if user is not the creator', async () => {
+      // Login as the second user
+      const loginResponse = await api
+        .post('/api/login')
+        .send({ username: 'root2', password: 'sekret2' })
+      const otherUserToken = loginResponse.body.token
+
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToDelete = blogsAtStart[0] // This blog belongs to 'root'
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer ${otherUserToken}`)
+        .expect(403)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
+    })
+
     test('succeeds with status code 204 even if blog does not exist', async () => {
       const nonExistingId = await helper.nonExistingId()
 
