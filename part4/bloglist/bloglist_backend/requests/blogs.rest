@@ -23,6 +23,7 @@ Content-Type: application/json
 }
 
 ### Create a new blog with token (run login first to get the token)
+# @name createBlog
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
 Authorization: Bearer {{login.response.body.token}}
@@ -33,3 +34,10 @@ Authorization: Bearer {{login.response.body.token}}
     "url": "http://example.com/new-blog-post",
     "likes": 0
 }
+
+### Delete a blog without token (Should fail)
+DELETE http://localhost:3003/api/blogs/{{createBlog.response.body.id}}
+
+### Delete a blog with token (run login first to get the token)
+DELETE http://localhost:3003/api/blogs/{{createBlog.response.body.id}}
+Authorization: Bearer {{login.response.body.token}}

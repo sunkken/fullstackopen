@@ -31,7 +31,12 @@ describe('when there are initially some blogs and users saved', () => {
       .send({ username: 'root', password: 'sekret' })
     token = loginResponse.body.token
 
-    await Blog.insertMany(helper.listWithManyBlogs)
+    // Associate blogs with the user
+    const blogsWithUser = helper.listWithManyBlogs.map(blog => ({
+      ...blog,
+      user: user._id
+    }))
+    await Blog.insertMany(blogsWithUser)
   })
 
   describe('retrieving users', () => {
@@ -219,6 +224,24 @@ describe('when there are initially some blogs and users saved', () => {
       assert.ok(titles.includes('New Blog Post'))
     })
 
+    test('fails with status code 401 if token is not provided', async () => {
+      const newBlog = {
+        title: 'New Blog Post',
+        author: 'Test Author',
+        url: 'http://example.com/new-blog-post',
+        likes: 0,
+        userId: (await helper.usersInDb())[0].id
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.listWithManyBlogs.length)
+    })
+
     test('defaults to 0 likes if likes property is missing', async () => {
       const newBlog = {
         title: 'Blog Without Likes',
@@ -283,6 +306,7 @@ describe('when there are initially some blogs and users saved', () => {
 
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
@@ -293,11 +317,24 @@ describe('when there are initially some blogs and users saved', () => {
       assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
     })
 
+    test('fails with status code 401 if token is not provided', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToDelete = blogsAtStart[0]
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
+    })
+
     test('succeeds with status code 204 even if blog does not exist', async () => {
       const nonExistingId = await helper.nonExistingId()
 
       await api
         .delete(`/api/blogs/${nonExistingId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
