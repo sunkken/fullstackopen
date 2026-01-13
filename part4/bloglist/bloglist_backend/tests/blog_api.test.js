@@ -23,6 +23,12 @@ describe('when there are initially some blogs and users saved', () => {
     await user.save()
     await user2.save()
 
+    // obtain JWT token for the user
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'sekret' })
+    token = loginResponse.body.token
+
     await Blog.insertMany(helper.listWithManyBlogs)
   })
 
@@ -199,6 +205,7 @@ describe('retrieving users', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -220,6 +227,7 @@ describe('retrieving users', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -239,6 +247,7 @@ describe('retrieving users', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
       
@@ -256,6 +265,7 @@ describe('retrieving users', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
       
