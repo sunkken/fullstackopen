@@ -8,9 +8,8 @@ import loginService from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState(null)
   const [user, setUser] = useState(null)  
 
   useEffect(() => {
@@ -32,23 +31,20 @@ const App = () => {
     return null
   }
 
-  const handleLogin = async event => {
-    event.preventDefault()
-
+  const handleLogin = async (credentials) => {
     try {
-      const user = await loginService.login({ username, password })
+      const user = await loginService.login(credentials)
 
       window.localStorage.setItem(
         'loggedBlogAppUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
     } catch {
-      setErrorMessage('Invalid Username or Password')
+      setMessageType('error')
+      setMessage('Invalid Username or Password')
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
       }, 5000)
     }
   }
@@ -63,42 +59,42 @@ const App = () => {
     try {
       const newBlog = await blogService.createNew(blogObject)
       setBlogs(blogs.concat(newBlog))
-      setErrorMessage(`New blog ${newBlog.title} by ${newBlog.author} added`)
+      setMessageType('success')
+      setMessage(`New blog ${newBlog.title} by ${newBlog.author} added`)
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
       }, 5000)
     } catch (error) {
-      setErrorMessage('Failed to add blog')
+      setMessageType('error')
+      setMessage('Failed to add blog')
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
       }, 5000)
     }
   }
 
   return (
     <div>
-      <h2>{user ? 'blogs' : 'log in to application'}</h2>
-      <Notification message={errorMessage} />
+      <h1>BlogList App</h1>
+      <Notification message={message} type={messageType} />
 
       {!user && (
-        <LoginForm
-          handleLogin={handleLogin}
-          username={username}
-          setUsername={setUsername}
-          password={password}
-          setPassword={setPassword}
-        />
+        <div>
+          <h2>Login to application</h2>
+          <LoginForm handleLogin={handleLogin} />
+        </div>
       )}
 
       {user && (
         <div>
           <div style={{ marginBottom: '20px' }}>
             <div>{user.name} logged in</div>
-            <button onClick={handleLogout}>logout</button>
+            <button onClick={handleLogout}>Logout</button>
           </div>
 
           <BlogForm createBlog={createBlog} />
 
+          <h2>Blogs</h2>
           {blogs.map(blog =>
             <Blog key={blog.id} blog={blog} />
           )}
