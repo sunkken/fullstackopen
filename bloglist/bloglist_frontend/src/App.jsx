@@ -61,6 +61,7 @@ const App = () => {
     try {
       const newBlog = await blogService.createNew(blogObject)
       setBlogs(blogs.concat(newBlog))
+      blogFormRef.current.toggleVisibility()
       setMessageType('success')
       setMessage(`New blog ${newBlog.title} by ${newBlog.author} added`)
       setTimeout(() => {
