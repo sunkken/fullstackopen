@@ -2,10 +2,12 @@ h1 {
   font-weight: bold;
 }
 
-.note {
-    color: grey;
-    padding-top: 3px;
-    font-size: 15px;
+.blog {
+  padding-top: 10px;
+  padding-left: 2px;
+  border: solid;
+  border-width: 1px;
+  margin-bottom: 5px;
 }
 
 button {
